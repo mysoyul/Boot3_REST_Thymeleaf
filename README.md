@@ -1,3 +1,21 @@
+### MariaDB 설정
+```
+# root 계정으로 접속하여 사용자 계정과 DB 생성 ( root / maria )
+mysql -u root –p
+MariaDB [(none)]> show databases;
+MariaDB [(none)]> use mysql;
+MariaDB [mysql]> create database boot_db; 
+MariaDB [mysql]> CREATE USER 'boot'@'%' IDENTIFIED BY 'boot';
+MariaDB [mysql]> GRANT ALL PRIVILEGES ON boot_db.* TO 'boot'@'%';
+MariaDB [mysql]> flush privileges; 
+MariaDB [mysql]> select user, host from user;
+MariaDB [mysql]> exit;
+
+# boot 사용자 계정으로 접속한다. ( boot/boot )
+mysql -u boot –p
+MariaDB [(none)]>use boot_db;
+
+```
 ### Users REST API
 * 등록
 ```
