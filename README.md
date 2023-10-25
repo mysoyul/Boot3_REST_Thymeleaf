@@ -73,3 +73,12 @@ MariaDB [(none)]>use boot_db;
     "roles":"ROLE_USER"
  }
 ```
+* 인증토큰 발급을 위한 로그인
+```
+  POST
+  http://localhost:8080/api/userinfos/login
+  
+ {
+    "password":"pwd1",
+    "email":"admin@aa.com"
+ }

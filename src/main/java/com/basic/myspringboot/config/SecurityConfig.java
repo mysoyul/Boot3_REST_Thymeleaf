@@ -1,5 +1,7 @@
 package com.basic.myspringboot.config;
 
+import com.basic.myspringboot.exception.security.CustomAccessDeniedHandler;
+import com.basic.myspringboot.exception.security.CustomAuthenticationEntryPoint;
 import com.basic.myspringboot.jwt.filter.JwtAuthenticationFilter;
 import com.basic.myspringboot.service.UserInfoUserDetailsService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -19,7 +21,9 @@ import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.security.web.AuthenticationEntryPoint;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.web.access.AccessDeniedHandler;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
 import org.springframework.security.web.servlet.util.matcher.MvcRequestMatcher;
@@ -41,9 +45,18 @@ public class SecurityConfig {
                 .requestMatchers(PathRequest.toStaticResources().atCommonLocations());
                 //.requestMatchers("/resources/static/**");
     }
+    @Bean
+    public AuthenticationEntryPoint authenticationEntryPoint() {
+        return new CustomAuthenticationEntryPoint();
+    }
 
     @Bean
-    @Order(2)
+    public AccessDeniedHandler accessDeniedHandler() {
+        return new CustomAccessDeniedHandler();
+    }
+
+    @Bean
+    @Order(1)
     public SecurityFilterChain apiFilterChain(HttpSecurity http, HandlerMappingIntrospector introspector) throws Exception {
         return http.csrf(AbstractHttpConfigurer::disable)
                 //http.csrf(csrf -> csrf.disable())
@@ -58,12 +71,16 @@ public class SecurityConfig {
                 .httpBasic(withDefaults())
                 .authenticationProvider(authenticationProvider())
                 .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class)
+                .exceptionHandling(authManager -> authManager
+                        .authenticationEntryPoint(authenticationEntryPoint())
+                        .accessDeniedHandler(accessDeniedHandler())
+                )
                 .build();
     }
 
 
     @Bean
-    @Order(1)
+    @Order(2)
     public SecurityFilterChain formLoginFilterChain(HttpSecurity http, HandlerMappingIntrospector introspector)
             throws Exception {
         return http.csrf(csrf -> csrf.disable())
